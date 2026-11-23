@@ -12,7 +12,6 @@ import * as g from './leoGlobals';
 import { command } from './decorators';
 import { Commands } from './leoCommands';
 import { Position } from './leoNodes';
-import { Bead } from './leoUndo';
 import { Block } from '../importers/base_importer';
 //@-<< leoImport imports >>
 //@+others
@@ -102,19 +101,22 @@ export class FreeMindImporter {
      */
     public async create_outline(p_path: string): Promise<Position> {
         const c = this.c;
-        let [junk, fileName] = g.os_path_split(p_path);
-        const undoData = c.undoer.beforeInsertNode(c.p);
-        try {
-            await this.import_file(p_path);
-            c.undoer.afterInsertNode(c.p, 'Import', undoData);
-        } catch (exception) {
-            g.es_print(
-                'Exception importing FreeMind file',
-                g.shortFileName(p_path)
-            );
-            g.es_exception(exception);
+        const u = c.undoer;
+
+        {
+            using changes = u.change_outline('freemind.create_outline');
+
+            try {
+                await this.import_file(p_path);
+            } catch (exception) {
+                g.es_print(
+                    'Exception importing FreeMind file',
+                    g.shortFileName(p_path)
+                );
+                g.es_exception(exception);
+            }
+            return c.p;
         }
-        return c.p;
     }
     //@+node:felix.20230519221548.4: *3* freemind.import_file
     /**
@@ -999,7 +1001,7 @@ export class LeoImportCommands {
     public async importDerivedFiles(
         parent: Position,
         paths: string[] | undefined,
-        command = 'Import'
+        command = 'import'
     ): Promise<Position | undefined> {
         const at = this.c.atFileCommands;
         const c = this.c;
@@ -1010,56 +1012,48 @@ export class LeoImportCommands {
             return undefined;
         }
         // Initial open from command line is not undoable.
-        if (command) {
-            u.beforeChangeGroup(current, command);
-        }
-        let p: Position; // p will exist because path is not empty.
-        for (let fileName of paths) {
-            fileName = fileName.replace('\\', '/'); // 2011/10/09.
-            g.setGlobalOpenDir(fileName);
-            const isThin = await at.scanHeaderForThin(fileName);
-            let undoData: Bead;
-            if (command) {
-                undoData = u.beforeInsertNode(parent);
-            }
-            p = parent.insertAfter();
+        {
+            using changes = u.change_outline(command);
 
-            const commanderFilename = c.fileName();
-            if (commanderFilename) {
-                // Try to set fileName to a relative path if possible.
-                const commanderDirectory = g.os_path_dirname(commanderFilename);
-                const importedFileDir = g.os_path_dirname(fileName);
-                // If the commander directory is present in the imported file directory, use a relative path.
-                if (importedFileDir.startsWith(commanderDirectory)) {
-                    let specificPath = importedFileDir.substring(commanderDirectory.length + 1);
-                    if (specificPath) {
-                        specificPath += '/'; // not empty so add a slash.
+            let p: Position; // p will exist because path is not empty.
+            for (let fileName of paths) {
+                fileName = fileName.replace('\\', '/'); // 2011/10/09.
+                g.setGlobalOpenDir(fileName);
+                const isThin = await at.scanHeaderForThin(fileName);
+
+                p = parent.insertAfter();
+
+                const commanderFilename = c.fileName();
+                if (commanderFilename) {
+                    // Try to set fileName to a relative path if possible.
+                    const commanderDirectory = g.os_path_dirname(commanderFilename);
+                    const importedFileDir = g.os_path_dirname(fileName);
+                    // If the commander directory is present in the imported file directory, use a relative path.
+                    if (importedFileDir.startsWith(commanderDirectory)) {
+                        let specificPath = importedFileDir.substring(commanderDirectory.length + 1);
+                        if (specificPath) {
+                            specificPath += '/'; // not empty so add a slash.
+                        }
+                        fileName = specificPath + g.os_path_basename(fileName);
                     }
-                    fileName = specificPath + g.os_path_basename(fileName);
                 }
-            }
 
-            if (isThin) {
-                // Create @file node, not a deprecated @thin node.
-                p.initHeadString('@file ' + fileName);
-                await at.read(p);
-            } else {
-                p.initHeadString('Imported @file ' + fileName);
-                await at.read(p);
+                if (isThin) {
+                    // Create @file node, not a deprecated @thin node.
+                    p.initHeadString('@file ' + fileName);
+                    await at.read(p);
+                } else {
+                    p.initHeadString('Imported @file ' + fileName);
+                    await at.read(p);
+                }
+                p.contract();
+                p.setDirty(); // 2011/10/09: tell why the file is dirty!
+
             }
-            p.contract();
-            p.setDirty(); // 2011/10/09: tell why the file is dirty!
-            if (command) {
-                u.afterInsertNode(p, command, undoData!); // undodata will exist under same 'if'.
-            }
+            current.expand();
+            c.p = current;
+            return p!;
         }
-        current.expand();
-        c.setChanged();
-        if (command) {
-            u.afterChangeGroup(p!, command);
-        }
-        c.redraw(current);
-        return p!;
     }
     //@+node:felix.20230511002352.30: *4* ic.importFilesCommand
     public async importFilesCommand(
@@ -1081,33 +1075,34 @@ export class LeoImportCommands {
             g.trace('===== no parent', g.callers());
             return;
         }
+        {
+            using changes = u.change_outline('ic.importFilesCommand');
 
-        for (let fn of files) {
-            // Report exceptions here, not in the caller.
-            try {
-                g.setGlobalOpenDir(fn);
-                // Leo 5.6: Handle undo here, not in createOutline.
-                const undoData = u.beforeInsertNode(parent);
-                let p: Position | undefined = parent.insertAsLastChild();
+            for (let fn of files) {
+                // Report exceptions here, not in the caller.
+                try {
+                    g.setGlobalOpenDir(fn);
+                    // Leo 5.6: Handle undo here, not in createOutline.
+                    let p: Position | undefined = parent.insertAsLastChild();
 
-                fn = g.relativeDirectory(c, fn);
-                p.h = `${treeType} ${fn}`;
-                u.afterInsertNode(p, 'Import', undoData);
-                p = await this.createOutline(p, undefined, undefined, treeType);
-                if (p && p.__bool__()) {
-                    // createOutline may fail.
-                    p.contract();
-                    p.setDirty();
-                    c.setChanged();
+                    fn = g.relativeDirectory(c, fn);
+                    p.h = `${treeType} ${fn}`;
+                    p = await this.createOutline(p, undefined, undefined, treeType);
+                    if (p && p.__bool__()) {
+                        // createOutline may fail.
+                        p.contract();
+                        p.setDirty();
+                    }
+                } catch (exception) {
+                    g.es_print('Exception importing', fn);
+                    g.es_exception(exception);
                 }
-            } catch (exception) {
-                g.es_print('Exception importing', fn);
-                g.es_exception(exception);
             }
-        }
 
-        c.checkOutline();
-        parent.expand();
+            c.checkOutline();
+            parent.expand();
+            c.p = parent;
+        }
     }
     //@+node:felix.20230511002352.31: *4* ic.importFreeMind
     /**
@@ -1156,17 +1151,20 @@ export class LeoImportCommands {
         const c = this.c;
         const u = c.undoer;
         let [junk, fileName] = g.os_path_split(p_path);
-        const undoData = u.beforeInsertNode(parent);
-        // Create the top-level headline.
-        let p = parent.insertAfter();
-        p.initHeadString(fileName);
-        if (this.webType === 'cweb') {
-            this.setBodyString(p, '@ignore\n@language cweb');
+        {
+            using changes = u.change_outline('ic.createOutlineFromWeb');
+
+            // Create the top-level headline.
+            let p = parent.insertAfter();
+            p.initHeadString(fileName);
+            if (this.webType === 'cweb') {
+                this.setBodyString(p, '@ignore\n@language cweb');
+            }
+            // Scan the file, creating one section for each function definition.
+            await this.scanWebFile(p_path, p);
+            c.p = p;
+            return p;
         }
-        // Scan the file, creating one section for each function definition.
-        await this.scanWebFile(p_path, p);
-        u.afterInsertNode(p, 'Import', undoData);
-        return p;
     }
     //@+node:felix.20230511002352.35: *5* findFunctionDef
     public findFunctionDef(s: string, i: number): string | undefined {
@@ -1509,7 +1507,7 @@ export class LeoImportCommands {
     public parse_body(p: Position): void {
 
         const c = this.c;
-        const [u, undoType] = [c.undoer, 'parse-body'];
+        const u = c.undoer;
         const language = c.getLanguage(p);
 
         if (p.hasChildren()) {
@@ -1528,22 +1526,20 @@ export class LeoImportCommands {
             return;
         }
         const importer = new importer_class(c);
+        {
+            using changes = u.change_outline('parse-body');
 
-        try {
-            const old_p = p.copy();
-            c.selectPosition(p);
-            const changed = this.parse_body_helper(p, importer);
-            c.selectPosition(old_p);
-            if (c.checkOutline()) {
-                return; // Error!
+            try {
+                const old_p = p.copy();
+                c.selectPosition(p);
+                this.parse_body_helper(p, importer);
+                if (c.checkOutline()) {
+                    return; // Error!
+                }
+                c.p = old_p;
+            } catch (exception) {
+                g.es_exception(exception);
             }
-            if (changed) {
-                u.afterChangeGroup(p, undoType);
-                c.setChanged();
-                c.redraw(old_p);
-            }
-        } catch (exception) {
-            g.es_exception(exception);
         }
     }
     //@+node:felix.20250812231137.1: *4* ic.compute_imported_headline
@@ -1588,27 +1584,20 @@ export class LeoImportCommands {
 
         // The main loop.
         let changed = blocks.length > 1;
-        if (changed) {
-            u.beforeChangeGroup(p, undoType);
-        }
         this.preprocess_blocks(blocks);
         while (blocks.length > 1) {
             // Change the node.
-            let bunch = u.beforeChangeBody(p);
+
             const block = blocks.shift()!; // pop(0) equivalent
             const head = lines.slice(block.start, block.end);
             const tail = lines.slice(block.end);
 
             p.b = head.join('');
             p.h = this.compute_imported_headline(importer, head, p);
-            u.afterChangeBody(p, undoType, bunch);
 
-            // Insert another node.
-            bunch = u.beforeInsertNode(p);
             const p2 = p.insertAfter();
             p2.h = this.compute_imported_headline(importer, tail, p);
             p2.b = tail.join('');
-            u.afterInsertNode(p2, undoType, bunch);
 
             // Continue splitting p2.
             p = p2;
@@ -1834,30 +1823,32 @@ export class MindMapImporter {
     //@+node:felix.20230520010426.2: *3* mindmap.create_outline
     public async create_outline(p_path: string): Promise<Position> {
         const c = this.c;
-        let [junk, fileName] = g.os_path_split(p_path);
-        const undoData = c.undoer.beforeInsertNode(c.p);
-        // Create the top-level headline.
-        const p = c.lastTopLevel().insertAfter();
-        let fn = g.shortFileName(p_path).trim();
-        if (fn.endsWith('.csv')) {
-            fn = fn.slice(0, -4);
-        }
+        const u = c.undoer;
 
-        p.h = fn;
-        try {
-            //f = open(p_path)
-            const w_uri = g.makeVscodeUri(p_path);
-            const readData = await vscode.workspace.fs.readFile(w_uri);
-            const s = Buffer.from(readData).toString('utf8');
+        {
+            using changes = u.change_outline('mindmap.create_outline');
+            // Create the top-level headline.
+            const p = c.lastTopLevel().insertAfter();
+            let fn = g.shortFileName(p_path).trim();
+            if (fn.endsWith('.csv')) {
+                fn = fn.slice(0, -4);
+            }
 
-            await this.scan(s, p); // ! leojs: Use string from file content instead
-            // f.close()
-            c.redraw();
-        } catch (exception) {
-            g.es_print('Invalid MindJet file:', fn);
+            p.h = fn;
+            try {
+                //f = open(p_path)
+                const w_uri = g.makeVscodeUri(p_path);
+                const readData = await vscode.workspace.fs.readFile(w_uri);
+                const s = Buffer.from(readData).toString('utf8');
+
+                await this.scan(s, p); // ! leojs: Use string from file content instead
+                // f.close()
+                c.redraw();
+            } catch (exception) {
+                g.es_print('Invalid MindJet file:', fn);
+            }
+            return p;
         }
-        c.undoer.afterInsertNode(p, 'Import', undoData);
-        return p;
     }
     //@+node:felix.20230520010426.3: *3* mindmap.import_files
     /**
@@ -1902,6 +1893,7 @@ export class MindMapImporter {
      * Create an outline from a MindMap (.csv) file.
      */
     public async scan(f: string, target: Position): Promise<void> {
+        // @ts-expect-error: csv can be used this way.
         const reader = await csv({
             output: 'csv',
         }).fromString(f);
@@ -2062,27 +2054,27 @@ export class MORE_Importer {
         s = s.replace(/\r/g, ''); // Fixes bug 626101.
         const lines = g.splitLines(s);
         // Convert the string to an outline and insert it after the current node.
-        if (this.check_lines(lines)) {
-            const last = c.lastTopLevel();
-            const undoData = u.beforeInsertNode(c.p);
-            const root = last.insertAfter();
-            root.h = fileName;
-            const p = this.import_lines(lines, root);
-            if (p && p.__bool__()) {
-                c.endEditing();
-                c.checkOutline();
-                p.setDirty();
-                c.setChanged();
-                u.afterInsertNode(root, 'Import MORE File', undoData);
-                c.selectPosition(root);
-                c.redraw();
-                return root;
+        {
+            using changes = u.change_outline('more.import_file');
+
+            if (this.check_lines(lines)) {
+                const last = c.lastTopLevel();
+                const root = last.insertAfter();
+                root.h = fileName;
+                const p = this.import_lines(lines, root);
+                if (p && p.__bool__()) {
+                    c.endEditing();
+                    c.checkOutline();
+                    p.setDirty();
+                    c.p = root;
+                    return root;
+                }
             }
+            if (!g.unitTesting) {
+                g.es('not a valid MORE file', fileName);
+            }
+            return undefined;
         }
-        if (!g.unitTesting) {
-            g.es('not a valid MORE file', fileName);
-        }
-        return undefined;
     }
     //@+node:felix.20230520220221.5: *3* MORE.import_lines
     public import_lines(
@@ -2173,7 +2165,7 @@ export class MORE_Importer {
                         }
                         n += 1;
                     }
-                    p.setBodyString(body);
+                    p.b = body;
                 }
                 //@-<< Add the lines to the body text of p >>
                 p.setDirty();
@@ -2715,53 +2707,58 @@ export class RecursiveImportController {
             return;
         }
         // Import all requested files.
-        const [c, u] = [this.c, this.c.undoer];
-        const t1 = process.hrtime();
-        g.app.disable_redraw = true;
+        const c = this.c;
+        const u = c.undoer;
+        let parent!: Position;
+        let t1!: [number, number];
+        {
+            using changes = u.change_outline('recursive-import');
 
-        const last = c.lastTopLevel();
-        // Always create a new last top-level node.
-        this.root = last.insertAfter();
-        const parent = this.root;
+            try {
+                t1 = process.hrtime();
+                g.app.disable_redraw = true;
 
-        try {
-            c.selectPosition(last);
-            const undoData = u.beforeInsertNode(last);
+                const last = c.lastTopLevel();
+                // Always create a new last top-level node.
+                this.root = last.insertAfter();
+                parent = this.root;
 
-            parent.v.h = 'imported files';
-            // Leo 5.6: Special case for a single file.
-            this.n_files = 0;
-            const w_isFile = await g.os_path_isfile(dir_);
-            if (w_isFile) {
-                if (this.verbose) {
-                    g.es_print("");
-                    g.es_print(`importing file: ${g.os_path_normpath(dir_)}`);
+                c.selectPosition(last);
+
+                parent.v.h = 'imported files';
+                // Leo 5.6: Special case for a single file.
+                this.n_files = 0;
+                const w_isFile = await g.os_path_isfile(dir_);
+                if (w_isFile) {
+                    if (this.verbose) {
+                        g.es_print("");
+                        g.es_print(`importing file: ${g.os_path_normpath(dir_)}`);
+                    }
+                    await this.import_one_file(dir_, parent);
+                } else {
+                    await this.import_dir(dir_, parent);
                 }
-                await this.import_one_file(dir_, parent);
-            } else {
-                await this.import_dir(dir_, parent);
+                await this.post_process(parent);
+
+            } catch (exception) {
+                this.error('Exception in recursive import');
+                g.es_exception(exception);
+            } finally {
+                g.app.disable_redraw = false;
+                for (const p2 of parent.self_and_subtree(false)) {
+                    p2.contract();
+                }
+                c.p = parent;
             }
-            await this.post_process(parent);
-            u.afterInsertNode(parent, 'recursive-import', undoData);
-        } catch (exception) {
-            this.error('Exception in recursive import');
-            g.es_exception(exception);
-        } finally {
-            g.app.disable_redraw = false;
-            for (const p2 of parent.self_and_subtree(false)) {
-                p2.contract();
+            if (!g.unitTesting) {
+                const t2 = process.hrtime();
+                const n = [...parent.subtree()].length;
+                g.es_print(
+                    `imported ${n} node${g.plural(n)} ` +
+                    `in ${this.n_files} file${g.plural(this.n_files)} ` +
+                    `in ${utils.getDurationSeconds(t1, t2)} seconds`
+                );
             }
-            c.setChanged();  // #4385: Ensure that mod times are written.
-            c.redraw(parent);
-        }
-        if (!g.unitTesting) {
-            const t2 = process.hrtime();
-            const n = [...parent.subtree()].length;
-            g.es_print(
-                `imported ${n} node${g.plural(n)} ` +
-                `in ${this.n_files} file${g.plural(this.n_files)} ` +
-                `in ${utils.getDurationSeconds(t1, t2)} seconds`
-            );
         }
     }
 
@@ -2832,7 +2829,13 @@ export class TabImporter {
         const c = this.c;
         const u = this.c.undoer;
         let s: string;
-        if (files && files.length) {
+        if (!files || !files.length) {
+            return;
+        }
+
+        {
+            using changes = u.change_outline('import-tabbed-files');
+
             let p: Position | undefined;
             for (const fn of files) {
                 try {
@@ -2846,7 +2849,6 @@ export class TabImporter {
                     continue;
                 }
                 if (s.trim() && this.check(g.splitLines(s))) {
-                    const undoData = u.beforeInsertNode(c.p);
                     const last = c.lastTopLevel();
                     this.root = last.insertAfter();
                     p = this.root;
@@ -2854,12 +2856,8 @@ export class TabImporter {
                     p.h = g.shortFileName(fn);
                     p.contract();
                     p.setDirty();
-                    u.afterInsertNode(p, 'Import Tabbed File', undoData);
                 }
-                if (p && p.__bool__()) {
-                    c.setChanged();
-                    c.redraw(p);
-                }
+                c.p = this.root!;
             }
         }
     }

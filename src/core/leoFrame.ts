@@ -723,20 +723,21 @@ export class NullTree {
             return;  // The hook claims to have handled the event.
         }
         // Handle undo.
-        const undoData = u.beforeChangeHeadline(p);
-        p.initHeadString(s); // change p.h *after* calling undoer's before method.
-        if (!c.changed) {
-            c.setChanged();
+        // with u:
+        //      u.set_command_name(undoType)
+        //      u.change_headline(p, s, ch=ch)
+        //      u.redraw_after_head_changed()
+        {
+            using scope = new DisposableStack();
+            scope.use(u.begin());
+            scope.defer(() => {
+                u.set_command_name(undoType);
+                u.change_headline(p, s, ch);
+                u.redraw_after_head_changed();
+            });
+            scope.move();
+
         }
-        // New in Leo 4.4.5: we must recolor the body because
-        // the headline may contain directives.
-        c.frame.scanForTabWidth(p);
-        // c.recolor(p); // ? Not Needed with leojs/vscode ?
-        p.setDirty();
-        u.afterChangeHeadline(p, undoType, undoData);
-        // Fix bug 1280689: don't call the non-existent c.treeEditFocusHelper
-        c.redraw_after_head_changed();
-        g.doHook("headkey2", { c: c, p: p, ch: ch, changed: changed });
     }
     //@+node:felix.20221210191616.1: *3* LeoTree.select & helpers
     /**
@@ -959,8 +960,7 @@ export class NullTree {
         }
 
         // Do not call treeFocusHelper here!
-        // c.treeFocusHelper()
-        c.undoer.onSelect(old_p, p);
+
     }
 
     //@+node:felix.20221210193746.6: *5* 4. LeoTree.scroll_cursor

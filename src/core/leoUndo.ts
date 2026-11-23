@@ -288,7 +288,7 @@ export class Undoer {
 
         if (u.undoBeadLevel === 0) {  // PR #5025
             // We aren't in undo code.
-            u.clearUndoState()
+            u.clearUndoState();
             // This message would be annoying.
             // g.es_print_unique_message(f"{command_name} is not undoable")
         }
@@ -449,11 +449,11 @@ export class Undoer {
 
         const change_headline_redoer = () => {
             update(new_h);
-        }
+        };
 
         const change_headline_undoer = () => {
             update(old_h);
-        }
+        };
 
         b.add_helpers(change_headline_redoer, change_headline_undoer);
         b.add_recolor(p, p);
@@ -1263,6 +1263,7 @@ export class Undoer {
         let disposed = false;
 
         return {
+            // Equivalent to __exit__
             [Symbol.dispose](): void {
                 if (disposed) {
                     return;
